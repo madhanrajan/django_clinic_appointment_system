@@ -1,0 +1,176 @@
+{% extends "appointments/base.html" %} {% block title %}Book an
+Appointment{%endblock %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+/>
+{% endblock %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="mb-0">Book an Appointment</h3>
+      </div>
+      <div class="card-body">
+        <p class="card-text">
+          Please fill out the form below to book your appointment.
+        </p>
+
+        <form method="post" class="mt-4">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label for="{{ form.name.id_for_label }}" class="form-label"
+              >Full Name</label
+            >
+            {{ form.name }}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.ic_number.id_for_label }}" class="form-label"
+              >IC Number</label
+            >
+            {{ form.ic_number }}
+            <div class="form-text">
+              Your identification card number is required for verification.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label
+              for="{{ form.whatsapp_number.id_for_label }}"
+              class="form-label"
+              >WhatsApp Number (Optional)</label
+            >
+            {{ form.whatsapp_number }}
+            <div class="form-text">
+              If provided, we'll send your appointment details via WhatsApp.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Appointment Time Selection</label>
+            <div class="alert alert-info">
+              <small>
+                <i class="fas fa-info-circle"></i>
+                Appointments are scheduled in 15-minute intervals. Maximum 1
+                appointment(s) per time slot.
+              </small>
+            </div>
+            <div class="form-check">
+              <input
+                type="radio"
+                name="time_selection"
+                id="time_selection_auto"
+                value="auto"
+                class="form-check-input"
+                checked
+                onchange="toggleTimeSelection()"
+              />
+              <label class="form-check-label" for="time_selection_auto">
+                Set automatically (next available slot)
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                type="radio"
+                name="time_selection"
+                id="time_selection_manual"
+                value="manual"
+                class="form-check-input"
+                onchange="toggleTimeSelection()"
+              />
+              <label class="form-check-label" for="time_selection_manual">
+                Select a specific time
+              </label>
+            </div>
+          </div>
+
+          <div class="mb-3" id="custom_time_container" style="display: none">
+            <label for="custom_time" class="form-label"
+              >Select Preferred Time</label
+            >
+            <input
+              type="datetime-local"
+              id="custom_time"
+              name="custom_time"
+              class="form-control"
+            />
+            <div class="form-text">
+              Please select a date and time for your appointment. Appointments
+              are available in 15-minute intervals.
+              <span class="text-danger"
+                >Note: If your selected time slot is already fully booked, you
+                will be notified after submission.</span
+              >
+            </div>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">
+              Book Appointment
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Get slot duration from settings
+    const slotDuration = 15;
+
+    // Initialize flatpickr for datetime picker
+    flatpickr("#custom_time", {
+      enableTime: true,
+      dateFormat: "Y-m-d H:i",
+      minDate: "today",
+      minuteIncrement: slotDuration,
+      time_24hr: true,
+      defaultHour: 9,
+      defaultMinute: 0,
+      // Round minutes to match slot duration
+      onOpen: function (selectedDates, dateStr, instance) {
+        if (selectedDates.length > 0) {
+          const date = selectedDates[0];
+          const minutes =
+            Math.floor(date.getMinutes() / slotDuration) * slotDuration;
+          date.setMinutes(minutes);
+          instance.setDate(date);
+        }
+      },
+      // Round minutes to match slot duration on close
+      onClose: function (selectedDates, dateStr, instance) {
+        if (selectedDates.length > 0) {
+          const date = selectedDates[0];
+          const minutes =
+            Math.floor(date.getMinutes() / slotDuration) * slotDuration;
+          date.setMinutes(minutes);
+          instance.setDate(date);
+        }
+      },
+    });
+
+    // Set up initial state
+    toggleTimeSelection();
+  });
+
+  function toggleTimeSelection() {
+    const autoSelected = document.getElementById("time_selection_auto").checked;
+    const customTimeContainer = document.getElementById(
+      "custom_time_container"
+    );
+
+    if (autoSelected) {
+      customTimeContainer.style.display = "none";
+      document.getElementById("custom_time").required = false;
+    } else {
+      customTimeContainer.style.display = "block";
+      document.getElementById("custom_time").required = true;
+    }
+  }
+</script>
+{% endblock %}

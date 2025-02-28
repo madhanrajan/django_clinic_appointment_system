@@ -1,0 +1,163 @@
+{% extends "appointments/base.html" %} {% block title %}Admin - Appointment
+Details{% endblock %} {% block admin_nav %}
+<div class="admin-nav bg-dark text-white p-3 mb-4 rounded">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <h4 class="mb-0">Admin Area</h4>
+    </div>
+    <div>
+      <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-light me-2"
+        >Dashboard</a
+      >
+      <a href="{% url 'admin_settings' %}" class="btn btn-outline-light me-2"
+        >Settings</a
+      >
+      <a
+        href="{% url 'admin_appointment_create' %}"
+        class="btn btn-outline-light me-2"
+        >New Appointment</a
+      >
+      <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">Appointment Details</h3>
+        </div>
+        <div class="card-body">
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <h5>Personal Information</h5>
+              <p><strong>Name:</strong> {{ appointment.name }}</p>
+              <p><strong>IC Number:</strong> {{ appointment.ic_number }}</p>
+              <p>
+                <strong>WhatsApp:</strong>
+                {% if appointment.whatsapp_number %}
+                <a
+                  href="https://wa.me/6{{ appointment.whatsapp_number }}"
+                  target="_blank"
+                >
+                  +6{{ appointment.whatsapp_number }}
+                </a>
+                {% else %} Not provided {% endif %}
+              </p>
+            </div>
+            <div class="col-md-6">
+              <h5>Appointment Information</h5>
+              <p>
+                <strong>Date & Time:</strong>
+                {{ appointment.appointment_time|date:"d M Y, h:i A" }}
+              </p>
+              <p>
+                <strong>Status:</strong>
+                <span
+                  class="badge rounded-pill {% if appointment.status == 'CONFIRMED' %}bg-success {% elif appointment.status == 'PENDING' %}bg-warning text-dark {% elif appointment.status == 'CANCELLED' %}bg-danger {% else %}bg-secondary{% endif %}"
+                >
+                  {{ appointment.status }}
+                </span>
+              </p>
+              <p><strong>Created:</strong> {{ appointment.created_at }}</p>
+              <p><strong>Last Updated:</strong> {{ appointment.updated_at }}</p>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header bg-light">
+                  <h5 class="mb-0">System Settings</h5>
+                </div>
+                <div class="card-body">
+                  <p class="text-muted">
+                    This appointment was created with the following system
+                    settings:
+                  </p>
+                  <ul>
+                    <li>Slot Duration: {{ settings.slot_duration }} minutes</li>
+                    <li>
+                      Max Appointments Per Slot: {{
+                      settings.max_appointments_per_slot }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary"
+              >Back to Dashboard</a
+            >
+            <div>
+              <a
+                href="{% url 'admin_appointment_edit' appointment.id %}"
+                class="btn btn-primary"
+                >Edit</a
+              >
+              <button
+                type="button"
+                class="btn btn-danger"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteModal"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+
+          <!-- Delete Modal -->
+          <div
+            class="modal fade"
+            id="deleteModal"
+            tabindex="-1"
+            aria-labelledby="deleteModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="deleteModalLabel">
+                    Confirm Delete
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  Are you sure you want to delete the appointment for {{
+                  appointment.name }}?
+                </div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                  >
+                    Cancel
+                  </button>
+                  <form
+                    action="{% url 'admin_appointment_delete' appointment.id %}"
+                    method="post"
+                    style="display: inline"
+                  >
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
