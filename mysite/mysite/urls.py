@@ -20,8 +20,9 @@ from django.contrib.auth import views as auth_views
 from appointments.views import landing_view
 
 urlpatterns = [
-    path('django-admin/', admin.site.urls),  # Renamed to avoid conflict with our custom admin
+    path('admin/', admin.site.urls),
     path('', include('appointments.urls')),
+    path('api/appointments/', include('appointments.api_urls')),
     
     # Authentication URLs
     path('login/', auth_views.LoginView.as_view(template_name='appointments/login.html'), name='login'),
